@@ -75,9 +75,9 @@
         [self addSubview:sep];
         
         //底部分割线
-        _bottomSep = [[UIView alloc] initWithFrame:CGRectZero];
-        _bottomSep.backgroundColor = [UIColor lightGrayColor];
-        [self addSubview:_bottomSep];
+//        _bottomSep = [[UIView alloc] initWithFrame:CGRectZero];
+//        _bottomSep.backgroundColor = [UIColor lightGrayColor];
+//        [self addSubview:_bottomSep];
         
         self.types = @[
                          @(NIMInputBarItemTypeVoice),
@@ -168,9 +168,9 @@
     [self adjustTextAndRecordView];
     
     //底部分割线
-    CGFloat sepHeight = .5f;
-    _bottomSep.nim_size     = CGSizeMake(self.nim_width, sepHeight);
-    _bottomSep.nim_bottom   = self.nim_height - sepHeight;
+//    CGFloat sepHeight = .5f;
+//    _bottomSep.nim_size     = CGSizeMake(self.nim_width, sepHeight);
+//    _bottomSep.nim_bottom   = self.nim_height - sepHeight;
 }
 
 
