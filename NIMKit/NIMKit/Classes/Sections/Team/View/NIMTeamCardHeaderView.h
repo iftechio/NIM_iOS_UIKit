@@ -37,6 +37,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface NIMTeamCardHeaderView : UIView
 
+@property (nonatomic,strong) UILabel *numberLabel;
+
 @property (nonatomic, weak) id<NIMTeamCardHeaderViewDelegate> delegate;
 
 @property (nonatomic, strong) NIMTeamCardHeaderViewModel *dataModel;

@@ -8,10 +8,15 @@
 
 #import <UIKit/UIKit.h>
 #import <NIMSDK/NIMSDK.h>
+#import "NIMTeamCardHeaderCell.h"
 #import "NIMTeamMemberListDataSource.h"
 
-@interface NIMTeamMemberListViewController : UIViewController
+@interface NIMTeamMemberListViewController : UIViewController <UICollectionViewDataSource, NIMTeamCardHeaderCellDelegate>
+
+@property (nonatomic, strong) UICollectionView *collectionView;
+@property (nonatomic, weak) id <NIMTeamMemberListDataSource> dataSource;
 
 - (instancetype)initWithDataSource:(id<NIMTeamMemberListDataSource>)dataSource;
+- (void)loadNextData;
 
 @end

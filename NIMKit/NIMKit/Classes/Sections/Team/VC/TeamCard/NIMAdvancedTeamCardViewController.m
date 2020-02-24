@@ -18,8 +18,6 @@
 #import "NIMTeamAnnouncementListViewController.h"
 #import "NIMKitUtil.h"
 #import "NIMKitProgressHUD.h"
-#import "NIMTeamCardHeaderView.h"
-#import "NIMTeamListDataManager.h"
 #import "NIMKitInfoFetchOption.h"
 
 @interface NIMAdvancedTeamCardViewController ()<NIMTeamMemberListCellActionDelegate,
@@ -29,9 +27,7 @@
                                                 NIMTeamCardHeaderViewDelegate,
                                                 NIMTeamAnnouncementListVCDelegate>
 
-@property (nonatomic,strong) NIMTeamCardHeaderView *headerView;
 @property (nonatomic,strong) NIMTeamCardViewControllerOption *option;
-@property (nonatomic, strong) NIMTeamListDataManager *dataSource;
 
 @end
 
@@ -92,22 +88,19 @@
     NSArray *ret = nil;
     __weak typeof(self) weakSelf = self;
     BOOL canEdit = [NIMKitUtil canEditTeamInfo:_dataSource.myTeamInfo];
-    BOOL isOwner    = _dataSource.myTeamInfo.type == NIMTeamMemberTypeOwner;
-    BOOL isManager  = _dataSource.myTeamInfo.type == NIMTeamMemberTypeManager;
-    
+
+    NIMTeamCardRowItem *itemQa = [[NIMTeamCardRowItem alloc] init];
+    itemQa.title = @"咨询管理员";
+    itemQa.action = @selector(didTapConsult);
+    itemQa.rowHeight = 50.f;
+    itemQa.type   = TeamCardRowItemTypeCommon;
+
     NIMTeamCardRowItem *teamMember = [[NIMTeamCardRowItem alloc] init];
     teamMember.title  = @"群成员";
     teamMember.rowHeight = 111.f;
     teamMember.action = @selector(enterMemberCard);
     teamMember.type   = TeamCardRowItemTypeTeamMember;
-    
-    NIMTeamCardRowItem *teamType = [[NIMTeamCardRowItem alloc] init];
-    teamType.title = @"群类型";
-    teamType.subTitle = @"高级群";
-    teamType.rowHeight = 50.f;
-    teamType.type   = TeamCardRowItemTypeCommon;
-    teamType.actionDisabled = YES;
-    
+
     NIMTeamCardRowItem *teamName = [[NIMTeamCardRowItem alloc] init];
     teamName.title = @"群名称";
     teamName.subTitle = _dataSource.team.teamName;
@@ -115,132 +108,11 @@
     teamName.rowHeight = 50.f;
     teamName.type   = TeamCardRowItemTypeCommon;
     teamName.actionDisabled = !canEdit;
-    
-    NIMTeamCardRowItem *teamNick = [[NIMTeamCardRowItem alloc] init];
-    teamNick.title = @"群昵称";
-    teamNick.subTitle = _dataSource.myTeamInfo.nickname;
-    teamNick.action = @selector(updateTeamNick);
-    teamNick.rowHeight = 50.f;
-    teamNick.type   = TeamCardRowItemTypeCommon;
 
-    
-    NIMTeamCardRowItem *teamIntro = [[NIMTeamCardRowItem alloc] init];
-    teamIntro.title = @"群介绍";
-    teamIntro.subTitle = _dataSource.team.intro.length ? _dataSource.team.intro : (canEdit ? @"点击填写群介绍" : @"");
-    teamIntro.action = @selector(updateTeamIntro);
-    teamIntro.rowHeight = 50.f;
-    teamIntro.type   = TeamCardRowItemTypeCommon;
-    teamIntro.actionDisabled = !canEdit;
-    
-    NIMTeamCardRowItem *teamAnnouncement = [[NIMTeamCardRowItem alloc] init];
-    teamAnnouncement.title = @"群公告";
-    teamAnnouncement.subTitle = @"点击查看群公告";//self.team.announcement.length ? self.team.announcement : (isManager ? @"点击填写群公告" : @"");
-    teamAnnouncement.action = @selector(updateTeamAnnouncement);
-    teamAnnouncement.rowHeight = 50.f;
-    teamAnnouncement.type   = TeamCardRowItemTypeCommon;
-    
-    NIMTeamCardRowItem *teamNotify = [[NIMTeamCardRowItem alloc] init];
-    teamNotify.title  = @"消息提醒";
-    teamNotify.subTitle = _dataSource.notifyStateText;
-    teamNotify.rowHeight = 50.f;
-    teamNotify.type = TeamCardRowItemTypeSelected;
-    teamNotify.optionItems = [self itemsWithListDic:_dataSource.allNotifyStates
-                                        selectValue:_dataSource.notifyState];
-    teamNotify.selectedBlock = ^(id<NIMKitSelectCardData> item) {
-        [weakSelf didUpdateTeamNotify:[item.value integerValue]];
-    };
+    ret = @[
+       @[itemQa, teamMember, teamName],
+    ];
 
-    NIMTeamCardRowItem *itemQuit = [[NIMTeamCardRowItem alloc] init];
-    itemQuit.title = @"退出高级群";
-    itemQuit.action = @selector(quitTeam);
-    itemQuit.rowHeight = 60.f;
-    itemQuit.type   = TeamCardRowItemTypeRedButton;
-    
-    NIMTeamCardRowItem *itemDismiss = [[NIMTeamCardRowItem alloc] init];
-    itemDismiss.title  = @"解散群聊";
-    itemDismiss.action = @selector(dismissTeam);
-    itemDismiss.rowHeight = 60.f;
-    itemDismiss.type   = TeamCardRowItemTypeRedButton;
-    
-    
-    NIMTeamCardRowItem *itemAuth = [[NIMTeamCardRowItem alloc] init];
-    itemAuth.title  = @"身份验证";
-    itemAuth.subTitle = _dataSource.joinModeText;
-    itemAuth.actionDisabled = !canEdit;
-    itemAuth.rowHeight = 60.f;
-    itemAuth.type   = TeamCardRowItemTypeSelected;
-    itemAuth.optionItems = [self itemsWithListDic:_dataSource.allJoinModes
-                                      selectValue:_dataSource.team.joinMode];
-    itemAuth.selectedBlock = ^(id<NIMKitSelectCardData> item) {
-        [weakSelf didUpdateTeamJoneMode:[item.value integerValue]];
-    };
-    
-    NIMTeamCardRowItem *itemInvite = [[NIMTeamCardRowItem alloc] init];
-    itemInvite.title  = @"邀请他人权限";
-    itemInvite.subTitle = _dataSource.inviteModeText;
-    itemInvite.actionDisabled = !canEdit;
-    itemInvite.rowHeight = 60.f;
-    itemInvite.type = TeamCardRowItemTypeSelected;
-    itemInvite.optionItems = [self itemsWithListDic:_dataSource.allInviteModes
-                                        selectValue:_dataSource.team.inviteMode];
-    itemInvite.selectedBlock = ^(id<NIMKitSelectCardData> item) {
-        [weakSelf didUpdateTeamInviteMode:[item.value integerValue]];
-    };
-    
-    NIMTeamCardRowItem *itemUpdateInfo = [[NIMTeamCardRowItem alloc] init];
-    itemUpdateInfo.title  = @"群资料修改权限";
-    itemUpdateInfo.subTitle = _dataSource.updateInfoModeText;
-    itemUpdateInfo.actionDisabled = !canEdit;
-    itemUpdateInfo.rowHeight = 60.f;
-    itemUpdateInfo.type = TeamCardRowItemTypeSelected;
-    itemUpdateInfo.optionItems = [self itemsWithListDic:_dataSource.allUpdateInfoModes
-                                            selectValue:_dataSource.team.updateInfoMode];
-    itemUpdateInfo.selectedBlock = ^(id<NIMKitSelectCardData> item) {
-        [weakSelf didUpdateTeamInfoMode:[item.value integerValue]];
-    };
-    
-    NIMTeamCardRowItem *itemBeInvite = [[NIMTeamCardRowItem alloc] init];
-    itemBeInvite.title  = @"被邀请人身份验证";
-    itemBeInvite.subTitle = _dataSource.beInviteModeText;
-    itemBeInvite.actionDisabled = !canEdit;
-    itemBeInvite.rowHeight = 60.f;
-    itemBeInvite.type = TeamCardRowItemTypeSelected;
-    itemBeInvite.optionItems = [self itemsWithListDic:_dataSource.allBeInviteModes
-                                          selectValue:_dataSource.team.beInviteMode];
-    itemBeInvite.selectedBlock = ^(id<NIMKitSelectCardData> item) {
-        [weakSelf didUpdateTeamBeInviteMode:[item.value integerValue]];
-    };
-    
-    NIMTeamCardRowItem *itemTop = [[NIMTeamCardRowItem alloc] init];
-    itemTop.title            = @"聊天置顶";
-    itemTop.switchOn         = _option.isTop;
-    itemTop.rowHeight        = 50.f;
-    itemTop.type             = TeamCardRowItemTypeSwitch;
-    itemTop.identify         = NIMTeamCardSwithCellTypeTop;
-    
-    if (isOwner) {
-        ret = @[
-                  @[teamMember],
-                  @[teamType,teamName,teamNick,teamIntro,teamAnnouncement,teamNotify, itemTop],
-                  @[itemAuth],
-                  @[itemInvite,itemUpdateInfo,itemBeInvite],
-                  @[itemDismiss],
-                 ];
-    } else if (isManager){
-        ret = @[
-                 @[teamMember],
-                 @[teamType,teamName,teamNick,teamIntro,teamAnnouncement,teamNotify, itemTop],
-                 @[itemAuth],
-                 @[itemInvite,itemUpdateInfo,itemBeInvite],
-                 @[itemQuit],
-              ];
-    } else {
-        ret = @[
-                  @[teamMember],
-                  @[teamType,teamName,teamNick,teamIntro,teamAnnouncement,teamNotify, itemTop],
-                  @[itemQuit],
-               ];
-    }
     return ret;
 }
 
@@ -286,13 +158,13 @@
                                                     handler:^(UIAlertAction * _Nonnull action) {
         [weakSelf didOntransferWithLeave:NO];
     }];
-    
+
     UIAlertAction *action1 = [UIAlertAction actionWithTitle:@"转让群并退出"
                                                       style:UIAlertActionStyleDefault
                                                     handler:^(UIAlertAction * _Nonnull action) {
         [weakSelf didOntransferWithLeave:YES];
     }];
-    
+
     UIAlertController *alert = [self makeAlertSheetWithTitle:@"请操作"
                                                      actions:@[action0, action1]];
     [self showAlert:alert];
@@ -305,11 +177,11 @@
     UIAlertAction *action0 = [UIAlertAction actionWithTitle:@"拍照" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [weakSelf didUpdateTeamAvatarWithType:UIImagePickerControllerSourceTypeCamera];
     }];
-    
+
     UIAlertAction *action1 = [UIAlertAction actionWithTitle:@"从相册" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
         [weakSelf didUpdateTeamAvatarWithType:UIImagePickerControllerSourceTypePhotoLibrary];
     }];
-    
+
     UIAlertController *alert = [self makeAlertSheetWithTitle:@"设置群头像"
                                                      actions:@[action0, action1]];
     [self showAlert:alert];
@@ -386,6 +258,10 @@
     [self showAlert:alert];
 }
 
+- (void)didTapConsult{
+
+}
+
 - (void)enterMemberCard{
     NIMTeamMemberListViewController *vc = [[NIMTeamMemberListViewController alloc] initWithDataSource:_dataSource];
     [self.navigationController pushViewController:vc animated:YES];
@@ -416,7 +292,7 @@
     NSMutableArray *users = [_dataSource memberIds];
     NSString *currentUserID = [_dataSource myAccount];
     [users addObject:currentUserID];
-    
+
     NIMContactFriendSelectConfig *config = [[NIMContactFriendSelectConfig alloc] init];
     config.filterIds = users;
     config.needMutiSelected = YES;

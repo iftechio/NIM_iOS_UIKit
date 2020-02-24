@@ -24,12 +24,8 @@
 typedef void(^NIMTeamMemberListFetchDataBlock)(BOOL isCompletion);
 
 @interface NIMTeamMemberListViewController ()<UICollectionViewDelegate,
-                                              UICollectionViewDataSource,
-                                              NIMTeamCardHeaderCellDelegate,
                                               NIMTeamMemberCardActionDelegate>
 
-@property (nonatomic, strong) UICollectionView *collectionView;
-@property (nonatomic, weak) id <NIMTeamMemberListDataSource> dataSource;
 @property (nonatomic, assign) NSInteger pageIndex;
 @property (nonatomic, assign) NSInteger totalPageCount;
 @property (nonatomic, assign) NSInteger currentOffset;
@@ -195,7 +191,7 @@ typedef void(^NIMTeamMemberListFetchDataBlock)(BOOL isCompletion);
     UICollectionViewFlowLayout *flowLayout = [[UICollectionViewFlowLayout alloc] init];
     flowLayout.minimumInteritemSpacing = CollectionEdgeInsetLeftRight;
     [self.collectionView setCollectionViewLayout:flowLayout animated:YES];
-    
+
     [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
     [coordinator animateAlongsideTransition:^(id <UIViewControllerTransitionCoordinatorContext> context)
      {

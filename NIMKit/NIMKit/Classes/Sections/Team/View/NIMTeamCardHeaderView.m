@@ -25,8 +25,6 @@
 
 @property (nonatomic,strong) UILabel *titleLabel;
 
-@property (nonatomic,strong) UILabel *numberLabel;
-
 @property (nonatomic,strong) UILabel *createTimeLabel;
 
 @end
@@ -47,7 +45,7 @@
 
 - (void)layoutSubviews {
     [super layoutSubviews];
-    
+
     _titleLabel.nim_width = _titleLabel.nim_width > MaxTitleLabelWidth ? MaxTitleLabelWidth : self.titleLabel.nim_width;
     _avatar.nim_left = AvatarLeft;
     _avatar.nim_top = AvatarTop;
@@ -66,23 +64,23 @@
 #pragma mark - Public
 - (void)setDataModel:(NIMTeamCardHeaderViewModel *)dataModel {
     _dataModel = dataModel;
-    
+
     //avatar
     NSURL *avatarUrl = dataModel.avatarUrl.length? [NSURL URLWithString:_dataModel.avatarUrl] : nil;
     [_avatar nim_setImageWithURL:avatarUrl placeholderImage:[UIImage nim_imageInKit:@"avatar_team"]];
-    
+
     //title
     _titleLabel.text  = dataModel.teamName;
     [_titleLabel sizeToFit];
-    
+
     //teamId
     _numberLabel.text = dataModel.teamId;
     [_numberLabel sizeToFit];
-    
+
     //create time
     _createTimeLabel.text  = [self formatTime:dataModel.createTime];
     [_createTimeLabel sizeToFit];
-    
+
     [self layoutIfNeeded];
 }
 
